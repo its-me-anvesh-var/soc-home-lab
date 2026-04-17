@@ -1,0 +1,59 @@
+<!-- ============================================================
+     Custom Wazuh Decoders
+     Author: Anvesh Raju Vishwaraju
+     Purpose: Parse custom log formats from lab applications
+     ============================================================ -->
+
+<decoder_list>
+
+  <!-- ── Custom App Authentication Decoder ── -->
+  <decoder name="custom-app-auth">
+    <prematch>^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[AUTH\]</prematch>
+  </decoder>
+
+  <decoder name="custom-app-auth-success">
+    <parent>custom-app-auth</parent>
+    <prematch>LOGIN_SUCCESS</prematch>
+    <regex>(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[AUTH\] LOGIN_SUCCESS user=(\S+) ip=(\S+)</regex>
+    <order>timestamp, user, srcip</order>
+  </decoder>
+
+  <decoder name="custom-app-auth-failed">
+    <parent>custom-app-auth</parent>
+    <prematch>LOGIN_FAILED</prematch>
+    <regex>(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[AUTH\] LOGIN_FAILED user=(\S+) ip=(\S+) reason=(\S+)</regex>
+    <order>timestamp, user, srcip, extra_data</order>
+  </decoder>
+
+  <!-- ── Custom Firewall Log Decoder ── -->
+  <decoder name="custom-firewall">
+    <prematch>^FIREWALL</prematch>
+  </decoder>
+
+  <decoder name="custom-firewall-deny">
+    <parent>custom-firewall</parent>
+    <prematch>DENY</prematch>
+    <regex>FIREWALL DENY src=(\S+) dst=(\S+) dport=(\d+) proto=(\S+)</regex>
+    <order>srcip, dstip, dstport, protocol</order>
+  </decoder>
+
+  <decoder name="custom-firewall-allow">
+    <parent>custom-firewall</parent>
+    <prematch>ALLOW</prematch>
+    <regex>FIREWALL ALLOW src=(\S+) dst=(\S+) dport=(\d+) proto=(\S+) bytes=(\d+)</regex>
+    <order>srcip, dstip, dstport, protocol, extra_data</order>
+  </decoder>
+
+  <!-- ── Web Application Log Decoder ── -->
+  <decoder name="webapp-log">
+    <prematch>^\[WEBAPP\]</prematch>
+  </decoder>
+
+  <decoder name="webapp-error">
+    <parent>webapp-log</parent>
+    <prematch>ERROR|EXCEPTION</prematch>
+    <regex>\[WEBAPP\] (ERROR|EXCEPTION) user=(\S+) endpoint=(\S+) msg="([^"]+)"</regex>
+    <order>status, user, url, extra_data</order>
+  </decoder>
+
+</decoder_list>

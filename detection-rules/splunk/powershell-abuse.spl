@@ -1,0 +1,48 @@
+# ============================================================
+# Detection Rule: Malicious PowerShell Usage
+# MITRE ATT&CK: T1059.001 - PowerShell
+# Severity: HIGH / CRITICAL
+# Author: Anvesh Raju Vishwaraju
+# ============================================================
+
+# --- RULE 1: PowerShell from Unusual Parent Process ---
+index=main sourcetype=WinEventLog:Security EventCode=4688
+    New_Process_Name="*powershell.exe"
+| where NOT match(Creator_Process_Name,
+    "(?i)explorer\.exe|cmd\.exe|taskmgr\.exe|svchost\.exe|wmiprvse\.exe")
+| eval severity="HIGH"
+| eval mitre_technique="T1059.001 - PowerShell Execution"
+| eval recommended_action="Investigate process chain. Capture memory if live. Check for encoded commands."
+| table _time, host, user, Creator_Process_Name,
+    New_Process_Name, severity, mitre_technique, recommended_action
+
+
+# --- RULE 2: Encoded PowerShell Command ---
+index=main sourcetype=WinEventLog:Security EventCode=4688
+    New_Process_Name="*powershell*"
+| where match(Process_Command_Line, "(?i)-enc|-encodedcommand|-e\s+[A-Za-z0-9+/=]{20,}")
+| eval severity="CRITICAL"
+| eval mitre_technique="T1059.001 - Encoded PowerShell"
+| eval recommended_action="URGENT: Decode command immediately. Likely malware dropper or C2 beacon."
+| table _time, host, user, Process_Command_Line, severity, mitre_technique, recommended_action
+
+
+# --- RULE 3: PowerShell Download Cradle ---
+index=main sourcetype=WinEventLog:Security EventCode=4688
+    New_Process_Name="*powershell*"
+| where match(Process_Command_Line,
+    "(?i)invoke-webrequest|iwr|wget|curl|downloadstring|downloadfile|net.webclient")
+| eval severity="CRITICAL"
+| eval mitre_technique="T1059.001 - PowerShell Download Cradle"
+| eval recommended_action="Block network. Capture process. Check what was downloaded and from where."
+| table _time, host, user, Process_Command_Line, severity, mitre_technique, recommended_action
+
+
+# --- RULE 4: PowerShell Execution Policy Bypass ---
+index=main sourcetype=WinEventLog:Security EventCode=4688
+    New_Process_Name="*powershell*"
+| where match(Process_Command_Line, "(?i)-executionpolicy bypass|-ep bypass|-exec bypass")
+| eval severity="HIGH"
+| eval mitre_technique="T1059.001 - Execution Policy Bypass"
+| eval recommended_action="Investigate script being run. Check if bypass was authorized by IT."
+| table _time, host, user, Process_Command_Line, severity, mitre_technique, recommended_action
