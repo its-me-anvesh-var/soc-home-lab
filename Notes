@@ -1,6 +1,6 @@
 #INterview points:
 
-"where does Splunk store its data?" — the answer is /opt/splunk/ on Linux. Index data lives in /opt/splunk/var/lib/splunk/. Configuration files live in /opt/splunk/etc/. Knowing file paths shows you've actually installed it, not just watched a YouTube video
+"where does Splunk store its data?" — the answer is /opt/splunk/ on Linux. Index data lives in /opt/splunk/var/lib/splunk/. Configuration files live in /opt/splunk/etc/. 
 
 
 Now start Splunk for the first time.
