@@ -1,3 +1,30 @@
 #INterview points:
 
 "where does Splunk store its data?" — the answer is /opt/splunk/ on Linux. Index data lives in /opt/splunk/var/lib/splunk/. Configuration files live in /opt/splunk/etc/. Knowing file paths shows you've actually installed it, not just watched a YouTube video
+
+
+Now start Splunk for the first time.
+
+**Type this exactly and press Enter:**
+
+```
+sudo /opt/splunk/bin/splunk start --accept-license
+```
+
+It will ask you two things:
+
+1. **"Please enter an administrator username:"** — type `admin` and press Enter
+2. **"Please enter a new password:"** — type `SOCadmin@123` and press Enter
+3. **"Please confirm your password:"** — type `SOCadmin@123` again and press Enter
+
+Then Splunk will start up — takes about 1-2 minutes. You'll see a lot of text scrolling.
+
+---
+
+**Write these down right now:**
+- Username: `admin`
+- Password: `SOCadmin@123`
+
+You'll need these every time you log into Splunk web UI.
+
+---
