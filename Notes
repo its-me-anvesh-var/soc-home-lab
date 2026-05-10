@@ -28,3 +28,10 @@ Then Splunk will start up — takes about 1-2 minutes. You'll see a lot of text 
 You'll need these every time you log into Splunk web UI.
 
 ---
+
+
+Normal error — it needs root permission to create the boot startup file.
+Type this instead:
+sudo /opt/splunk/bin/splunk enable boot-start -user splunk
+Notice the difference — sudo at the start instead of sudo -u splunk.
+This runs the boot-start setup as root (which it needs to write system files), but tells it to run Splunk as the splunk user.
