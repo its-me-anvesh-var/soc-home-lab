@@ -35,3 +35,12 @@ Type this instead:
 sudo /opt/splunk/bin/splunk enable boot-start -user splunk
 Notice the difference — sudo at the start instead of sudo -u splunk.
 This runs the boot-start setup as root (which it needs to write system files), but tells it to run Splunk as the splunk user.
+
+
+
+
+What you built today in SOC interview language:
+
+"I built a SOC home lab from scratch on VirtualBox, deployed Ubuntu Server 22.04, installed and configured Splunk Enterprise 10.2.3 as the SIEM, created a dedicated service account following principle of least privilege, configured NAT port forwarding for web UI access, and enabled auto-start on boot. Troubleshot 6 real issues including driver conflicts, package corruption, and service account permissions."
+
+That's your Day 1 answer when an interviewer asks "tell me about your hands-on experience."
