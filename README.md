@@ -1,126 +1,234 @@
 # SOC Home Lab — Build Journal
+**Goal:** Build a fully functional SOC lab to prepare for
+SOC L1/L2 analyst interviews in India.
+
+**Target roles:** SOC Analyst L1/L2 at TCS, Wipro, Infosys,
+HCL, Capgemini, Mphasis, Securonix, Paladion
+
+---
 
 ## Lab Architecture
-- Host Machine: Windows 11 (16GB RAM, 450GB D drive)
-- Analyst Workstation: macOS (browser-based access)
-- Hypervisor: VirtualBox 7.1.8
 
-## Node 1: Splunk-Server (Ubuntu VM)
-- OS: Ubuntu 22.04.5 LTS (Jammy Jellyfish)
-- RAM: 4096 MB
-- Storage: 50 GB
-- Role: SIEM server — runs Splunk Enterprise
-- Network: NAT (internet access)
+```
+Windows 11 Host (16GB RAM, 450GB D drive)
+│
+├── VirtualBox 7.1.8
+│   ├── Splunk-Server VM (Ubuntu 22.04 LTS)
+│   │   └── Splunk Enterprise 10.2.3 (SIEM)
+│   │
+│   └── Windows 10 VM (coming Day 2)
+│       └── Sysmon + Universal Forwarder
+│
+└── macOS M2 (Analyst Workstation — browser only)
+    └── http://127.0.0.1:8000 → Splunk Web UI
+```
 
 ## Data Flow
-Endpoint VM → Universal Forwarder → Splunk Server → Analyst Browser
+```
+Windows VM (endpoint)
+    → Universal Forwarder
+        → Splunk Server (port 9997)
+            → Indexed and searchable
+                → Analyst browser (port 8000)
+```
 
-## Day 1 Progress
+---
 
-### Phase 1 — Lab Foundation ✅
+## Tool Stack
+
+| Category | Tool | Version | Status |
+|---|---|---|---|
+| Hypervisor | VirtualBox | 7.1.8 | ✅ Running |
+| OS (SIEM server) | Ubuntu Server | 22.04.5 LTS | ✅ Running |
+| SIEM | Splunk Enterprise | 10.2.3 | ✅ Running |
+| EDR | Wazuh | TBD | 🔜 Week 2 |
+| Endpoint OS | Windows 10 | TBD | 🔜 Day 2 |
+| Log source | Sysmon | TBD | 🔜 Day 2 |
+| Threat Intel | MISP + VirusTotal | TBD | 🔜 Week 4 |
+| Network IDS | Suricata | TBD | 🔜 Week 5 |
+| Attack Sim | Atomic Red Team | TBD | 🔜 Week 3 |
+
+---
+
+## Day 1 — Lab Foundation ✅ COMPLETE
+**Date:** 10 May 2026
+**Duration:** ~4 hours
+
+### What was built
 - [x] Created SOC-Lab folder structure on D:\SOC-Lab\
 - [x] Downloaded Ubuntu 22.04.5 LTS Server ISO (1.99GB)
 - [x] Installed VirtualBox 7.1.8 + Extension Pack
 - [x] Created Splunk-Server VM (4GB RAM, 2 CPU, 50GB disk)
-- [x] Configured VM network (NAT adapter)
-- [x] Installed Ubuntu Server 22.04.5 LTS (Jammy Jellyfish)
+- [x] Installed Ubuntu Server 22.04.5 LTS from scratch
 - [x] Enabled OpenSSH during installation
-- [x] First successful login to Ubuntu VM
+- [x] First successful login to Ubuntu terminal
+- [x] Updated all Ubuntu packages (71 packages)
+- [x] Downloaded Splunk Enterprise 10.2.3 (1.2GB)
+- [x] Installed Splunk Enterprise
+- [x] Created dedicated splunk service user
+- [x] Set correct file permissions on /opt/splunk
+- [x] Started Splunk successfully
+- [x] Configured NAT port forwarding (Host 8000 → VM 8000)
+- [x] Accessed Splunk Web UI from host browser ✅
+- [x] Enabled Splunk auto-start on boot
+- [x] Took VM snapshot — Splunk-Installed-Working
 
-### Phase 2 — Ubuntu Configuration ✅
-- [x] Updated all Ubuntu packages (apt update && apt upgrade)
-- [x] 71 packages updated successfully
-- [x] Downloaded Splunk Enterprise 10.2.3 .deb package (1.2GB)
-- [x] Installed Splunk Enterprise 10.2.3
-- [x] Created dedicated splunk system user
-- [x] Set correct file permissions for Splunk
-- [x] Started Splunk successfully — web server running on port 8000
-- [ ] Accessed Splunk Web UI from host browser (next step)
-
-### Phase 3 — Splunk Running ✅
-- [x] Splunk daemon (splunkd) started successfully
-- [x] SSL certificate generated (self-signed)
-- [x] Web interface available at http://127.0.0.1:8000
-- [ ] Configured Splunk auto-start on boot
-- [ ] Accessed from host Windows browser
+---
 
 ## Troubleshooting Log
 
-### Issue 3 — Splunk refusing to run as root
-- **Error:** "Running Splunk Enterprise as root is deprecated"
+### Issue 1 — VirtualBox Host-Only Adapter Error
+- **Error:** VERR_INTNET_FLT_IF_NOT_FOUND
+- **Cause:** Windows 11 driver conflict with VirtualBox 7.1.8
+- **Attempted:** VBoxNetAdpCtl, netlwf reinstall,
+  full VirtualBox reinstall
+- **Fix:** Disabled Adapter 2 entirely, used NAT only
+  with port forwarding instead
+- **Status:** Resolved ✅
+- **Learning:** Host-Only networking has known issues on
+  Windows 11 with VirtualBox 7.x. NAT + port forwarding
+  is equally valid for single-machine labs.
+
+### Issue 2 — wget flag typo (-0 vs -O)
+- **Error:** wget: invalid option -- '0'
+- **Cause:** Typed -0 (zero) instead of -O (capital O)
+- **Fix:** Reran command with correct -O flag
+- **Status:** Resolved ✅
+- **Learning:** Linux is case sensitive. Always double
+  check flags. -O means output filename, -0 means nothing.
+
+### Issue 3 — Corrupted Splunk .deb download
+- **Error:** splunk.deb is not a Debian format archive
+- **Cause:** First download was incomplete due to flag typo
+- **Fix:** Redownloaded correct file, verified 1.2GB size
+- **Status:** Resolved ✅
+- **Learning:** Verify file size after download before
+  installing. Use md5sum to verify checksums on
+  production systems.
+
+### Issue 4 — Splunk refusing to run as root
+- **Error:** Running Splunk Enterprise as root is deprecated
 - **Cause:** Splunk 10.x blocks root execution by default
-- **Fix:** Created dedicated splunk user, changed ownership 
-  of /opt/splunk to splunk user, ran Splunk as splunk user
+- **Fix:** Created dedicated splunk user account,
+  changed ownership of /opt/splunk, ran as splunk user
 - **Commands used:**
 ```bash
-  sudo useradd -m splunk
-  sudo chown -R splunk:splunk /opt/splunk
-  sudo -u splunk /opt/splunk/bin/splunk start \
-    --accept-license --answer-yes \
-    --no-prompt --seed-passwd SOCadmin@123
-```
-- **Status:** Resolved ✅
-- **Learning:** In production SOCs, Splunk never runs as root. 
-  Dedicated service accounts are a security best practice — 
-  principle of least privilege.
-
-### Issue 4 — First splunk.deb download corrupted
-- **Error:** "splunk.deb is not a Debian format archive"
-- **Cause:** First wget used wrong flag (-0 zero vs -O capital O),
-  file was incomplete/corrupted
-- **Fix:** Redownloaded with correct filename, installed 
-  splunk-10.2.3-4d61cf8a5c0c-linux-amd64.deb
-- **Status:** Resolved ✅
-- **Learning:** Always verify downloaded file size matches 
-  expected size before installing packages.
-
-## Key Concepts Learned Today
-- **Hypervisor:** Software that creates and runs VMs
-- **NAT Network:** VM gets internet via host machine
-- **SSH:** How SOC analysts remotely access servers
-- **.deb package:** Ubuntu's installer format
-- **apt:** Ubuntu's package manager
-- **sudo:** Run command as administrator in Linux
-- **Principle of Least Privilege:** Never run services 
-  as root — use dedicated service accounts
-- **splunkd:** The Splunk daemon (background service) 
-  that runs the SIEM engine
-- **Port 8000:** Default Splunk web UI port
-
-## Commands Reference
-```bash
-# Check system info
-ip a                    # show IP addresses
-df -h                   # check disk space
-free -h                 # check RAM
-
-# Update Ubuntu
-sudo apt update && sudo apt upgrade -y
-
-# Download Splunk
-wget -O splunk.deb "https://download.splunk.com/..."
-
-# Install Splunk
-sudo dpkg -i splunk-10.2.3-4d61cf8a5c0c-linux-amd64.deb
-
-# Create splunk user
 sudo useradd -m splunk
 sudo chown -R splunk:splunk /opt/splunk
-
-# Start Splunk
 sudo -u splunk /opt/splunk/bin/splunk start \
   --accept-license --answer-yes \
   --no-prompt --seed-passwd SOCadmin@123
+```
+- **Status:** Resolved ✅
+- **Learning:** Principle of Least Privilege — services
+  should never run as root. In real SOCs, Splunk runs
+  as a dedicated low-privilege service account.
 
-# Check Splunk status
+### Issue 5 — Browser could not reach VM on 10.0.2.15
+- **Error:** Browser timeout on http://10.0.2.15:8000
+- **Cause:** NAT networking isolates VM from host.
+  VM can reach internet but host cannot reach VM directly
+- **Fix:** Added VirtualBox port forwarding rule:
+  Host 127.0.0.1:8000 → Guest 10.0.2.15:8000
+- **Status:** Resolved ✅
+- **Learning:** NAT = one way (VM to internet).
+  Port forwarding = punch a hole for specific ports.
+  This is how cloud firewalls and security groups work too.
+
+### Issue 6 — boot-start permission denied
+- **Error:** Can't create RC file: Permission denied
+- **Cause:** boot-start needs root to write system startup
+  files but was run as splunk user
+- **Fix:** sudo /opt/splunk/bin/splunk enable boot-start -user splunk
+- **Status:** Resolved ✅
+- **Learning:** Some commands need root to write system
+  files but run the service as a low-privilege user.
+  Common pattern in Linux service management.
+
+---
+
+## Commands Reference
+
+```bash
+# System info
+whoami                  # current user
+ip a                    # show all IP addresses
+ip a | grep "inet "     # show only IPs
+df -h                   # disk space
+free -h                 # RAM usage
+
+# Package management
+sudo apt update         # refresh package list
+sudo apt upgrade -y     # install all updates
+
+# Download files
+wget -O filename.deb "URL"  # capital O = output filename
+
+# Install .deb package
+sudo dpkg -i package.deb
+
+# User management
+sudo useradd -m username          # create new user
+sudo chown -R user:user /path     # change folder ownership
+
+# Splunk service commands
+sudo -u splunk /opt/splunk/bin/splunk start
+sudo -u splunk /opt/splunk/bin/splunk stop
 sudo -u splunk /opt/splunk/bin/splunk status
+sudo -u splunk /opt/splunk/bin/splunk restart
 
-# Check which port Splunk is on
-ss -tlnp | grep 8000
+# Enable Splunk auto-start on boot
+sudo /opt/splunk/bin/splunk enable boot-start -user splunk
+
+# Network checks
+ss -tlnp | grep 8000    # check if port 8000 is listening
+ping 8.8.8.8            # test internet connectivity
 ```
 
-## Screenshots to Capture
-- [x] 01-ubuntu-first-login.png
-- [x] 02-ubuntu-updated.png
-- [x] 03-splunk-started.png
-- [ ] 04-splunk-web-ui.png ← after browser access
+---
+
+## Key Concepts Learned — Day 1
+
+| Concept | SOC Context |
+|---|---|
+| Hypervisor | Creates isolated VMs — same as SOC jump boxes |
+| NAT Network | VM shares host internet — like PAT in enterprise |
+| Port Forwarding | Exposes specific ports — like firewall rules |
+| SSH | Remote server access — how analysts access SIEM |
+| .deb package | Ubuntu installer format — like .exe on Windows |
+| apt | Package manager — installs and updates Linux tools |
+| sudo | Run as admin — like Windows UAC elevation |
+| Principle of Least Privilege | Services run as low-priv users |
+| splunkd | Splunk background service (daemon) |
+| Port 8000 | Default Splunk Web UI port |
+| Port 9997 | Default Splunk forwarder receiving port |
+
+---
+
+## Screenshots
+
+| File | What it shows |
+|---|---|
+| 01-ubuntu-first-login.png | First successful Ubuntu login |
+| 02-ubuntu-updated.png | apt upgrade complete |
+| 03-splunk-started.png | Splunk daemon started in terminal |
+| 04-splunk-web-ui.png | Splunk Web UI in browser |
+
+---
+
+## Day 2 Plan
+- [ ] Download Windows 10 ISO
+- [ ] Create Windows 10 VM (endpoint)
+- [ ] Install Sysmon with SwiftOnSecurity config
+- [ ] Install Splunk Universal Forwarder
+- [ ] Configure UF to send logs to Splunk
+- [ ] Verify Windows Event Logs appear in Splunk
+- [ ] Run first SPL search on real data
+
+---
+
+## Credentials (Lab only — never use real passwords here)
+- Ubuntu login: analyst / SOClab@123
+- Splunk Web UI: admin / SOCadmin@123
+- Splunk URL: http://127.0.0.1:8000
+- Splunk forwarder port: 9997
