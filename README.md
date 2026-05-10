@@ -30,58 +30,97 @@ Endpoint VM → Universal Forwarder → Splunk Server → Analyst Browser
 ### Phase 2 — Ubuntu Configuration ✅
 - [x] Updated all Ubuntu packages (apt update && apt upgrade)
 - [x] 71 packages updated successfully
-- [ ] Downloaded Splunk Enterprise 9.4.1 .deb package (in progress)
-- [ ] Installed Splunk Enterprise
+- [x] Downloaded Splunk Enterprise 10.2.3 .deb package (1.2GB)
+- [x] Installed Splunk Enterprise 10.2.3
+- [x] Created dedicated splunk system user
+- [x] Set correct file permissions for Splunk
+- [x] Started Splunk successfully — web server running on port 8000
+- [ ] Accessed Splunk Web UI from host browser (next step)
+
+### Phase 3 — Splunk Running ✅
+- [x] Splunk daemon (splunkd) started successfully
+- [x] SSL certificate generated (self-signed)
+- [x] Web interface available at http://127.0.0.1:8000
 - [ ] Configured Splunk auto-start on boot
-- [ ] Accessed Splunk Web UI from host browser
+- [ ] Accessed from host Windows browser
 
 ## Troubleshooting Log
 
-### Issue 1 — VirtualBox Host-Only Adapter Error
-- **Error:** VERR_INTNET_FLT_IF_NOT_FOUND
-- **Cause:** Windows 11 driver conflict with VirtualBox 7.1.8
-- **Attempted fixes:** VBoxNetAdpCtl, netlwf driver reinstall, 
-  full VirtualBox reinstall via Modify
-- **Final fix:** Disabled Adapter 2 entirely, using NAT only
+### Issue 3 — Splunk refusing to run as root
+- **Error:** "Running Splunk Enterprise as root is deprecated"
+- **Cause:** Splunk 10.x blocks root execution by default
+- **Fix:** Created dedicated splunk user, changed ownership 
+  of /opt/splunk to splunk user, ran Splunk as splunk user
+- **Commands used:**
+```bash
+  sudo useradd -m splunk
+  sudo chown -R splunk:splunk /opt/splunk
+  sudo -u splunk /opt/splunk/bin/splunk start \
+    --accept-license --answer-yes \
+    --no-prompt --seed-passwd SOCadmin@123
+```
 - **Status:** Resolved ✅
+- **Learning:** In production SOCs, Splunk never runs as root. 
+  Dedicated service accounts are a security best practice — 
+  principle of least privilege.
 
-### Issue 2 — wget capital O vs zero typo
-- **Error:** wget: invalid option -- '0'
-- **Cause:** Typed -0 (zero) instead of -O (capital O)
-- **Fix:** Reran command with correct -O flag
+### Issue 4 — First splunk.deb download corrupted
+- **Error:** "splunk.deb is not a Debian format archive"
+- **Cause:** First wget used wrong flag (-0 zero vs -O capital O),
+  file was incomplete/corrupted
+- **Fix:** Redownloaded with correct filename, installed 
+  splunk-10.2.3-4d61cf8a5c0c-linux-amd64.deb
 - **Status:** Resolved ✅
-- **Learning:** Linux commands are case sensitive. 
-  Always double check flags before pressing Enter.
+- **Learning:** Always verify downloaded file size matches 
+  expected size before installing packages.
 
 ## Key Concepts Learned Today
-- **Hypervisor:** Software that creates and runs VMs 
-  (VirtualBox is Type 2 — runs on top of Windows)
-- **NAT Network:** VM gets internet via host machine's 
-  connection — like your phone sharing WiFi
-- **SSH:** Secure Shell — how SOC analysts remotely 
-  access servers without sitting in front of them
-- **.deb package:** Ubuntu's installer format 
-  (equivalent of .exe on Windows)
-- **apt:** Ubuntu's package manager — like Microsoft 
-  Store but for Linux tools
-- **sudo:** Run a command as administrator in Linux
-  (equivalent of "Run as Administrator" on Windows)
+- **Hypervisor:** Software that creates and runs VMs
+- **NAT Network:** VM gets internet via host machine
+- **SSH:** How SOC analysts remotely access servers
+- **.deb package:** Ubuntu's installer format
+- **apt:** Ubuntu's package manager
+- **sudo:** Run command as administrator in Linux
+- **Principle of Least Privilege:** Never run services 
+  as root — use dedicated service accounts
+- **splunkd:** The Splunk daemon (background service) 
+  that runs the SIEM engine
+- **Port 8000:** Default Splunk web UI port
 
-## Commands Used Today
+## Commands Reference
 ```bash
-# Check system info after login
+# Check system info
 ip a                    # show IP addresses
 df -h                   # check disk space
-free -h                 # check RAM usage
+free -h                 # check RAM
 
 # Update Ubuntu
-sudo apt update         # refresh package list
-sudo apt upgrade -y     # install all updates
+sudo apt update && sudo apt upgrade -y
 
 # Download Splunk
 wget -O splunk.deb "https://download.splunk.com/..."
+
+# Install Splunk
+sudo dpkg -i splunk-10.2.3-4d61cf8a5c0c-linux-amd64.deb
+
+# Create splunk user
+sudo useradd -m splunk
+sudo chown -R splunk:splunk /opt/splunk
+
+# Start Splunk
+sudo -u splunk /opt/splunk/bin/splunk start \
+  --accept-license --answer-yes \
+  --no-prompt --seed-passwd SOCadmin@123
+
+# Check Splunk status
+sudo -u splunk /opt/splunk/bin/splunk status
+
+# Check which port Splunk is on
+ss -tlnp | grep 8000
 ```
 
-## Screenshots Captured
-- 01-ubuntu-first-login.png
-- 02-ubuntu-updated.png
+## Screenshots to Capture
+- [x] 01-ubuntu-first-login.png
+- [x] 02-ubuntu-updated.png
+- [x] 03-splunk-started.png
+- [ ] 04-splunk-web-ui.png ← after browser access
