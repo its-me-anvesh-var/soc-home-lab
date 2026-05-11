@@ -107,4 +107,28 @@ index=_internal component=metrics
 
 Run it — tell me how many results you get.
 
+Perfect — rex worked this time, just needed the filter to show matches clearly.
+
+---
+
+**Full SPL commands learned today:**
+
+| Command | SOC Use |
+|---|---|
+| `head N` | Limit results |
+| `stats count by field` | Count events |
+| `sort -count` | Sort highest first |
+| `!=` | Exclude noise |
+| `table` | Clean columns |
+| `eval` | Create new fields |
+| `case()` | Auto-classify alerts |
+| `timechart` | Attack timeline |
+| `rex` | Extract data from messages |
+| `where isnotnull()` | Filter empty fields |
+
+**These 10 commands are your SPL foundation.** Every SOC investigation uses a combination of these.
+
+---
+
+
 
