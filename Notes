@@ -132,3 +132,9 @@ Perfect — rex worked this time, just needed the filter to show matches clearly
 
 
 
+
+What just happened — interview explanation:
+
+"I installed Sysmon using the SwiftOnSecurity configuration which is the industry standard config used in enterprise SOCs. It enables 29 event types including process creation (EID 1), network connections (EID 3), file creation (EID 11), DNS queries (EID 22), and registry changes (EID 13). Sysmon runs as a Windows service and logs to the Microsoft-Windows-Sysmon/Operational event channel."
+
+
