@@ -85,6 +85,26 @@ Exactly right — good instinct. Let me sharpen that into a perfect interview an
 Every single SOC L1 interview in India asks about Sysmon Event IDs.
 ---
 
+No worries — metrics messages in this version of Splunk have a slightly different format. The rex pattern didn't match.
 
+That's actually a real SOC lesson:
+
+> **Rex fails silently** — if the pattern doesn't match, it just returns empty. Always verify your rex pattern worked by checking if the new field has values.
+
+---
+
+**In real SOC you verify rex worked like this:**
+
+```
+index=_internal component=metrics
+| head 20
+| rex field=message "group=(?P<group>\w+)"
+| where isnotnull(group)
+| table _time, group, message
+```
+
+`where isnotnull(group)` — only show results where rex successfully extracted something.
+
+Run it — tell me how many results you get.
 
 
