@@ -44,3 +44,47 @@ What you built today in SOC interview language:
 "I built a SOC home lab from scratch on VirtualBox, deployed Ubuntu Server 22.04, installed and configured Splunk Enterprise 10.2.3 as the SIEM, created a dedicated service account following principle of least privilege, configured NAT port forwarding for web UI access, and enabled auto-start on boot. Troubleshot 6 real issues including driver conflicts, package corruption, and service account permissions."
 
 That's your Day 1 answer when an interviewer asks "tell me about your hands-on experience."
+
+
+
+
+
+
+Exactly right — good instinct. Let me sharpen that into a perfect interview answer:
+
+---
+
+**Full interview answer:**
+
+> "Windows Event Log is built into Windows by default and captures basic security events like logins, logouts, and account changes. However it has gaps — for example it doesn't log which parent process spawned a child process, network connections made by processes, or file creation events by default.
+>
+> Sysmon fills those gaps. It's a free Microsoft Sysinternals tool that adds 29 additional event types including process creation with full command line (EID 1), network connections with destination IP (EID 3), file creation (EID 11), DNS queries (EID 22), and registry changes (EID 13).
+>
+> In a SOC, Windows Event Log alone would miss most malware behavior. Sysmon is what makes endpoint detection actually possible."
+
+---
+
+**The key phrase interviewers love:**
+
+> "Windows Event Log tells you what happened. Sysmon tells you how and why."
+
+---
+
+**The 6 Sysmon Event IDs you must know cold:**
+
+| EID | What it captures | Why it matters |
+|---|---|---|
+| 1 | Process creation | Catch malware execution |
+| 3 | Network connection | Catch C2 beaconing |
+| 7 | Image/DLL loaded | Catch DLL hijacking |
+| 11 | File created | Catch dropped payloads |
+| 13 | Registry value set | Catch persistence |
+| 22 | DNS query | Catch C2 domains |
+
+---
+Every single SOC L1 interview in India asks about Sysmon Event IDs.
+---
+
+
+
+
