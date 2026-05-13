@@ -138,3 +138,11 @@ What just happened — interview explanation:
 "I installed Sysmon using the SwiftOnSecurity configuration which is the industry standard config used in enterprise SOCs. It enables 29 event types including process creation (EID 1), network connections (EID 3), file creation (EID 11), DNS queries (EID 22), and registry changes (EID 13). Sysmon runs as a Windows service and logs to the Microsoft-Windows-Sysmon/Operational event channel."
 
 
+While it installs — quick concept:
+
+Why port 9997?
+Port 8000 = Splunk Web UI (humans use this via browser)
+Port 9997 = Splunk data receiver (Universal Forwarder sends logs here)
+In a real SOC interview if asked "how does the forwarder communicate with Splunk?" — answer: "Universal Forwarder sends compressed, encrypted log data to the Splunk indexer on port 9997 using Splunk's proprietary S2S protocol."
+
+That answer impresses interviewers. Most candidates just say "it sends logs to Splunk."
